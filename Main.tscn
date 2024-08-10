@@ -1,22 +1,140 @@
-[gd_scene load_steps=4 format=3 uid="uid://bimu2yeuf7oy2"]
+[gd_scene load_steps=22 format=3 uid="uid://bimu2yeuf7oy2"]
 
+[ext_resource type="Script" path="res://Main.cs" id="1_5k5vr"]
 [ext_resource type="Shader" path="res://Shaders/TechBox.gdshader" id="1_d8f3e"]
+[ext_resource type="Shader" path="res://Shaders/TrippyPanel.gdshader" id="2_5vfwh"]
+[ext_resource type="Shader" path="res://Shaders/DepthBurn.gdshader" id="5_rrs6d"]
+[ext_resource type="Material" uid="uid://busn7fyljnw0h" path="res://Materials/DepthBurn.tres" id="6_37fcu"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f2c7t"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_8e4ac"]
+sky_material = SubResource("ProceduralSkyMaterial_f2c7t")
+
+[sub_resource type="Environment" id="Environment_u7rgv"]
+background_mode = 2
+sky = SubResource("Sky_8e4ac")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kl3gl"]
+render_priority = 0
+shader = ExtResource("2_5vfwh")
+shader_parameter/CameraPosition = Vector3(0, 0, 3)
+shader_parameter/CameraRotation = Vector3(0, 0, 0)
+shader_parameter/Z_Resolution = 200
+shader_parameter/points = null
+
+[sub_resource type="QuadMesh" id="QuadMesh_62cn6"]
+material = SubResource("ShaderMaterial_kl3gl")
+size = Vector2(2, 2)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_2k2gu"]
+fractal_type = 2
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_no414"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_2k2gu")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yhpgd"]
 render_priority = 0
 shader = ExtResource("1_d8f3e")
-shader_parameter/test = null
-shader_parameter/xrot = 3.0
-shader_parameter/yrot = 1.2
-shader_parameter/zrot = 3.0
+shader_parameter/xrot = 1.0
+shader_parameter/yrot = 1.1
+shader_parameter/zrot = 1.13
+shader_parameter/noise1 = SubResource("NoiseTexture2D_no414")
 
 [sub_resource type="BoxMesh" id="BoxMesh_wx1bn"]
 material = SubResource("ShaderMaterial_yhpgd")
 
-[node name="Main" type="Node3D"]
+[sub_resource type="BoxMesh" id="BoxMesh_oyxbk"]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxMesh_wx1bn")
+[sub_resource type="BoxMesh" id="BoxMesh_fxqti"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_f8rcw"]
+noise_type = 5
+frequency = 0.0208
+fractal_type = 3
+fractal_octaves = 1
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_66vmv"]
+noise = SubResource("FastNoiseLite_f8rcw")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ry3jl"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("5_rrs6d")
+shader_parameter/PlaneNormal = Vector3(0, 1, 0)
+shader_parameter/PlaneOffset = -1.0
+shader_parameter/noise = SubResource("NoiseTexture2D_66vmv")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p44iq"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 3, 3, 0.01)
+
+[sub_resource type="BoxMesh" id="BoxMesh_na8xl"]
+material = SubResource("StandardMaterial3D_p44iq")
+size = Vector3(2, 0.05, 2)
+
+[node name="Main" type="Node3D" node_paths=PackedStringArray("CarouselGimbal", "Teleport1", "Teleport2", "TeleportSubject1", "TeleportSubject2")]
+transform = Transform3D(1, 0, -2.98023e-08, 0, 1, 0, 2.98023e-08, 0, 1, 0, 0, 0)
+rotation_edit_mode = 1
+script = ExtResource("1_5k5vr")
+CarouselGimbal = NodePath("CarouselGimbal")
+Teleport1 = NodePath("CarouselGimbal/Node3D3/Teleport1")
+Teleport2 = NodePath("CarouselGimbal/Node3D3/Teleport2")
+TeleportSubject1 = NodePath("CarouselGimbal/Node3D3/TeleportSubject1")
+TeleportSubject2 = NodePath("CarouselGimbal/Node3D3/TeleportSubject2")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_u7rgv")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 5.77719, 0)
+shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.27049)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.415)
+
+[node name="CarouselGimbal" type="Node3D" parent="."]
+transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 0, -3.72529e-09, -20)
+rotation_edit_mode = 1
+
+[node name="Node3D" type="Node3D" parent="CarouselGimbal"]
+transform = Transform3D(0.939693, 0, 0.342019, 0, 1, 0, -0.342019, 0, 0.939693, 6.84039, 0, 18.7939)
+
+[node name="TrippyPanel" type="MeshInstance3D" parent="CarouselGimbal/Node3D"]
+mesh = SubResource("QuadMesh_62cn6")
+
+[node name="Node3D2" type="Node3D" parent="CarouselGimbal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.49803e-05, 0, 20)
+
+[node name="TechBox" type="MeshInstance3D" parent="CarouselGimbal/Node3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.49803e-05, 0, -3.0268e-09)
+mesh = SubResource("BoxMesh_wx1bn")
+skeleton = NodePath("../../..")
+
+[node name="Node3D3" type="Node3D" parent="CarouselGimbal"]
+transform = Transform3D(0.766045, 0, 0.642787, 0, 1, 0, -0.642787, 0, 0.766045, 12.8557, 0, 15.3209)
+
+[node name="TeleportSubject2" type="MeshInstance3D" parent="CarouselGimbal/Node3D3"]
+transform = Transform3D(0.707329, 0, -0.706885, 0, 1, 0, 0.706885, 0, 0.707329, 1.5, 0, -0.6)
+mesh = SubResource("BoxMesh_oyxbk")
+surface_material_override/0 = ExtResource("6_37fcu")
+
+[node name="TeleportSubject1" type="MeshInstance3D" parent="CarouselGimbal/Node3D3"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -1.5, 0, -0.6)
+mesh = SubResource("BoxMesh_fxqti")
+surface_material_override/0 = SubResource("ShaderMaterial_ry3jl")
+
+[node name="Teleport1" type="MeshInstance3D" parent="CarouselGimbal/Node3D3"]
+transform = Transform3D(1, 0, 1.13687e-12, 0, 1, 0, -1.13687e-12, 0, 1, -1.5, 1, -0.5)
+mesh = SubResource("BoxMesh_na8xl")
+
+[node name="Teleport2" type="MeshInstance3D" parent="CarouselGimbal/Node3D3"]
+transform = Transform3D(1, 0, 1.25056e-12, 0, 1, 0, -1.25056e-12, 0, 1, 1.5, 1, -0.5)
+mesh = SubResource("BoxMesh_na8xl")

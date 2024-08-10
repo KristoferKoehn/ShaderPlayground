@@ -1,13 +1,14 @@
 shader_type spatial;
 
+uniform vec3 CameraPosition = vec3(0,0,3);
+uniform vec3 CameraRotation = vec3(0,0,0);
+uniform int Z_Resolution = 200;
 
-uniform float xrot;
-uniform float yrot;
-uniform float zrot;
+uniform vec3[3] points;
+//camera is at position (0,0,3)
+//transform UV into perpendicular plane twice the size at (0,0,-3)
+//0,0 top left, and goes to (-1, -1, -3)
 
-uniform sampler2D noise1;
-
-//rot == (phi, theta, psi)
 mat3 ProcessRotation(vec3 rot) {
 	float phi = rot.x;
 	float theta = rot.y;
@@ -26,16 +27,29 @@ mat3 ProcessRotation(vec3 rot) {
 	return PositionalMatrix;
 }
 
+vec3 FarPlanePositionFromUV(vec2 uv) {
+	return vec3((uv.x * 2.0) -1.0, (uv.y * 2.0) - 1.0, CameraPosition.z-6.0);
+}
+
 void vertex() {
-	VERTEX = VERTEX * ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
-	NORMAL = NORMAL * ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
 	
 	// Called for every vertex the material is visible on.
 }
 
 void fragment() {
-	ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
-	//ALPHA = texture(noise1, vec2(UV.x + sin(TIME), UV.y + cos(TIME))).r;
-	//ALBEDO = NORMAL * transpose(ProcessRotation(vec3(TIME * xrot,TIME *yrot,TIME * zrot)));
+	vec3 TriangleNormal = cross(points[0] - points[1], points[0] - points[2]);
+	
+	vec3 target = FarPlanePositionFromUV(UV);
+	target = (normalize(target) * 6.0)/ float(Z_Resolution);
+	
+	target = target * ProcessRotation(CameraRotation);
+	
+	vec3 seekPoint = CameraPosition;
+	for (int i = 0; i < Z_Resolution; i++) {
+		float N = dot(TriangleNormal,(CameraPosition + seekPoint - points[0]));
+		if (N == 0.0) {
+			
+		}
+	}
 	// Called for every pixel the material is visible on.
 }

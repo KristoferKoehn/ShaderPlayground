@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3 uid="uid://b1dqem28035cq"]
+
+[ext_resource type="Shader" path="res://Shaders/DepthBurn.gdshader" id="1_o1i2o"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_0dhnv"]
+noise_type = 2
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_fqllb"]
+noise = SubResource("FastNoiseLite_0dhnv")
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_o1i2o")
+shader_parameter/PlaneNormal = Vector3(0, 1, 0)
+shader_parameter/PlaneOffset = null
+shader_parameter/noise = SubResource("NoiseTexture2D_fqllb")
