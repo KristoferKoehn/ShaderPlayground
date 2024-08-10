@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://bimu2yeuf7oy2"]
+
+[ext_resource type="Shader" path="res://Shaders/TechBox.gdshader" id="1_d8f3e"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yhpgd"]
+render_priority = 0
+shader = ExtResource("1_d8f3e")
+shader_parameter/test = null
+shader_parameter/xrot = 3.0
+shader_parameter/yrot = 1.2
+shader_parameter/zrot = 3.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_wx1bn"]
+material = SubResource("ShaderMaterial_yhpgd")
+
+[node name="Main" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_wx1bn")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.27049)
