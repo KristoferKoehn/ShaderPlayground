@@ -27,14 +27,15 @@ mat3 ProcessRotation(vec3 rot) {
 }
 
 void vertex() {
-	VERTEX = VERTEX * ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
-	NORMAL = NORMAL * ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
-	
+	//VERTEX = VERTEX * ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
+	//NORMAL = NORMAL * ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
+	VERTEX = VERTEX * ProcessRotation(vec3(xrot, yrot, zrot));
+	NORMAL = NORMAL * ProcessRotation(vec3(xrot, yrot, zrot));
 	// Called for every vertex the material is visible on.
 }
 
 void fragment() {
-	ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
+	//ProcessRotation(vec3(TIME * xrot, TIME * yrot, TIME * zrot));
 	//ALPHA = texture(noise1, vec2(UV.x + sin(TIME), UV.y + cos(TIME))).r;
 	//ALBEDO = NORMAL * transpose(ProcessRotation(vec3(TIME * xrot,TIME *yrot,TIME * zrot)));
 	// Called for every pixel the material is visible on.
