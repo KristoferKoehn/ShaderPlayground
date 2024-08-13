@@ -3,13 +3,15 @@ render_mode unshaded;
 
 uniform int RaysPerPixel = 1;
 uniform int MaxBounces = 2;
-uniform int Z_Resolution = 200;
-uniform vec3 CameraPosition = vec3(0,0,3);
-uniform vec3 CameraRotation = vec3(0,0,0);
+//uniform vec3 CameraPosition = vec3(0,0,0);
+//uniform vec3 CameraRotation = vec3(0,0,0);
 uniform float NearPlane = 0.1;
 uniform float FarPlane = 8;
 uniform float FOV = 2;
 uniform float AspectRatio = 1;
+uniform mat4 ViewMatrix;
+uniform mat4 InvViewMatrix;
+uniform sampler2D testImage;
 
 struct Sphere {
 	vec3 position;
@@ -29,6 +31,7 @@ struct HitInfo {
 	float dst;
 	vec3 hitPoint;
 	vec3 normal;
+	Sphere sphere;
 };
 
 const int Objects = 5;
@@ -41,15 +44,51 @@ uniform vec3[Objects] emissionColor : source_color;
 
 varying float State;
 
-HitInfo CheckCollision(Ray ray, Sphere sphere) {
-	HitInfo hitinfo;
+HitInfo SphereCheckCollision(Ray ray, Sphere sphere) {
+	HitInfo hitinfo = HitInfo(false, 0.0, vec3(0,0,0), vec3(0,0,0), sphere);
+	vec3 offsetOrigin = ray.origin - sphere.position;
 	
 	float a = dot(ray.dir, ray.dir);
-	//float b = 2 * dot()
+	float b = 2.0 * dot(offsetOrigin, ray.dir);
+	float c = dot(offsetOrigin, offsetOrigin) - sphere.radius * sphere.radius;
 	
+	float discriminant = b * b - 4.0 * a * c;
+	
+	if (discriminant >= 0.0) {
+		float dst = (-b - sqrt(discriminant)) / (2.0 * a);
+		
+		if (dst >= 0.0) {
+			hitinfo.hit = true;
+			hitinfo.dst = dst;
+			hitinfo.hitPoint = ray.origin + ray.dir * dst;
+			hitinfo.normal = normalize(hitinfo.hitPoint - sphere.position);
+			//added sphere in initialize
+		}
+	}
 	return hitinfo;
 }
 
+HitInfo CalculateCollision(Ray ray, Sphere[Objects] spheres) {
+	HitInfo closestHit;
+	closestHit.hit = false;
+	closestHit.dst = pow(10,5);
+	for (int k = 0; k < Objects; k++) { 
+		
+		HitInfo hi = SphereCheckCollision(ray, spheres[k]);
+		if (hi.hit) {
+			closestHit.hit = true;
+			if (hi.dst < closestHit.dst) {
+				closestHit.dst = hi.dst;
+				closestHit.sphere = hi.sphere;
+				closestHit.normal = hi.normal;
+				closestHit.hitPoint = hi.hitPoint;
+				closestHit.sphere = hi.sphere;
+			}
+		}
+	}
+	
+	return closestHit;
+}
 
 float noise(vec2 uv) {
 	return fract(sin(dot(uv, vec2(12.25, 10.356))* 23.12 + State) * 5054.53);
@@ -77,58 +116,54 @@ vec3 GetReflected(vec3 incoming, Sphere[Objects] spheres, int k) {
 	return outgoing;
 }
 
-vec3 DiffuseReflected(vec3 incoming, Sphere[Objects] spheres, int k) {
+vec3 DiffuseReflected(vec3 incoming) {
 	vec3 direction = RandomDirection(State);
 	return direction * sign(dot(normalize(incoming), direction));
 }
 
-mat3 ProcessRotationZYX(vec3 rot) {
-	float phi = rot.x;
-	float theta = rot.y;
-	float psi = rot.z;
-	mat3 PositionalMatrix;
-
-	PositionalMatrix[0][0] = cos(theta) * cos(psi) + sin(theta) * sin(phi) * sin(psi); //done?
-	PositionalMatrix[1][0] = cos(phi) * sin(psi); //done?
-	PositionalMatrix[2][0] = cos(theta) * sin(phi) * sin(psi) - cos(psi) * sin(theta); //done?
-	PositionalMatrix[0][1] = -cos(theta) * sin(psi) + cos(psi) * sin(theta) * sin(phi); //done?
-	PositionalMatrix[1][1] = cos(phi) * cos(psi); //done?
-	PositionalMatrix[2][1] = cos(theta) * cos(psi) * sin(phi) + sin(theta) * sin(psi);
-	PositionalMatrix[0][2] = cos(phi) * sin(theta);
-	PositionalMatrix[1][2] = -sin(phi);
-	PositionalMatrix[2][2] = cos(theta) * cos(phi);
-	return PositionalMatrix;
+vec3 Trace(Ray ray, inout float seed, Sphere[Objects] spheres) {
+	
+	vec3 incomingLight = vec3(0,0,0);
+	vec3 rayColor = vec3(1,1,1);
+	for (int i = 0; i <= MaxBounces; i++) {
+		seed = noise(ray.dir.xz);
+		HitInfo hitInfo = CalculateCollision(ray, spheres);
+		if(hitInfo.hit) {
+			ray.origin = hitInfo.hitPoint;
+			ray.dir = DiffuseReflected(hitInfo.normal);
+			incomingLight += hitInfo.sphere.emissionColor * rayColor;
+			rayColor *= hitInfo.sphere.color;
+		} else {
+			break;
+		}
+	}
+	
+	
+	return incomingLight;
 }
 
-mat4 ProjectionMatrix() {
-	float z_n = NearPlane;
-	float z_f = FarPlane;
-	
-	mat4 proj = mat4(0);
-	vec4 column1 = vec4(1.0/(AspectRatio * tan(FOV/2.0)),0,0,0);
-	vec4 column2 = vec4(0,1.0/(tan(FOV/2.0)),0,0);
-	vec4 column3 = vec4(0,0,-((z_f + z_n)/(z_f - z_n)),-1);
-	vec4 column4 = vec4(0,0,-((2.0 * z_f * z_n)/(z_f - z_n)),0);
-	
-	proj[0] = column1;
-	proj[1] = column2;
-	proj[2] = column3;
-	proj[3] = column4;
-	
-	return proj;
+float sigmoid(float x) {
+	return (-2.5f * x / 0.2f)/(1.0f + abs(-2.5f * x/ 0.2f)) *  0.7f + 0.5f;
 }
 
-mat4 InvProjectionMatrix() {
-	return inverse(ProjectionMatrix());
-}
+
 
 vec3 FarPlanePositionFromUV(vec2 uv) {
-	vec3 NearPlaneOrigin = vec3((uv.x - 1.0) * 4.0, uv.y, NearPlane);
-	return vec3((NearPlaneOrigin.x -FOV/2.0) * FOV, (NearPlaneOrigin.y), NearPlane-FarPlane);
+	float x_ndc = 2.0 * uv.x - 1.0;
+	float y_ndc = 1.0 - 2.0 * uv.y;
+	//vec3 P_view = vec3(x_ndc * tan(FOV/2.0) * AspectRatio, y_ndc * tan(FOV/2.0), -FarPlane);
+	vec3 P_view = vec3(x_ndc * tan(FOV/2.0) * AspectRatio, y_ndc * tan(FOV/2.0), -FarPlane);
+	return P_view;
 }
 
 void vertex() {
 	// Called for every vertex the material is visible on.
+}
+
+vec2 latlong(vec3 sphere) {
+	float lat = acos(sphere.y / 1.0); //theta
+	float lon = atan(sphere.x / sphere.z); //phi
+	return vec2(lat, lon);
 }
 
 void fragment() {
@@ -141,39 +176,29 @@ void fragment() {
 		spheres[i].roughness = roughness[i];
 		spheres[i].emissionColor = emissionColor[i];
 	}
-
+	
 	for(int b = 0; b < RaysPerPixel; b++) {
-		State = noise(UV);
-		vec3 target = FarPlanePositionFromUV(UV) * ProcessRotationZYX(CameraRotation) + CameraPosition;
-		target = (normalize(target) * FarPlane)/ float(Z_Resolution);
-		
+		//State = noise(vec2(TIME, UV.y)); crazy noise pattern;
+		State = noise(vec2(23, 33));
+		vec3 target = (InvViewMatrix * vec4(FarPlanePositionFromUV(UV), 1.0)).xyz;
 		Ray r;
-		r.origin = vec3(UV.x * 4.0, UV.y, 0.1) * ProcessRotationZYX(CameraRotation) + CameraPosition;
-		r.dir = target;
-		
-		vec3 incomingLight = vec3(0,0,0);
-		vec3 rayColor = vec3(1,1,1);
-		vec3 seekPoint =  vec3(UV.x * 4.0, UV.y, 0.1) * ProcessRotationZYX(CameraRotation) + CameraPosition;
+		r.origin = (InvViewMatrix * vec4((2.0 * UV.x - 1.0) * AspectRatio, (1.0 - 2.0 * UV.y), -NearPlane, 1.0)).xyz;
+		r.dir = normalize(target - r.origin);
 		int bounces = 0;
-		for (int i = 0; i < Z_Resolution; i++) {
-			seekPoint += target;
-			for (int k = 0; k < Objects; k++) {
-				State = noise(UV);
-				if (length(seekPoint - spheres[k].position) <= spheres[k].radius) {
-					incomingLight += rayColor * spheres[k].emissionColor;
-					rayColor *= spheres[k].color;
-					vec3 reflected = (GetReflected(target, spheres, k))/2.0;
-					vec3 RoughnessVector = DiffuseReflected(seekPoint - spheres[k].position, spheres, k) * clamp(spheres[k].roughness, 0,1.0);
-					target = (reflected + RoughnessVector)/2.0;
-					seekPoint += target;
-					bounces++;
-				}
-			}
-			
-			if (bounces >= MaxBounces) {
-				break;
-			}
-			ALBEDO += incomingLight;
+		ALBEDO = Trace(r, State,spheres);
+		
+		HitInfo h = CalculateCollision(r,spheres);
+		if (h.hit) {
+			//ALBEDO = (ViewMatrix * vec4(r.origin, 1.0)).xyz;
+			float y = h.normal.y;
+			float x = h.normal.x;
+			float z = h.normal.z;
+			//ALBEDO = vec3((x + 1.0) / 2.0, (y + 1.0) / 2.0, (y + 1.0) / 2.0);
+			//ALBEDO = texture(testImage, vec2((x + 1.0) / 4.0, -sigmoid(y + 1.0))).xyz;
+			//ALBEDO = (vec4(r.dir, 1.0)).xyz;
+			//ALBEDO = h.sphere.color;
 		}
+		
 	}
+	
 }
