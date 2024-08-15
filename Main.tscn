@@ -1,12 +1,13 @@
-[gd_scene load_steps=45 format=3 uid="uid://bimu2yeuf7oy2"]
+[gd_scene load_steps=46 format=3 uid="uid://bimu2yeuf7oy2"]
 
 [ext_resource type="Script" path="res://Main.cs" id="1_5k5vr"]
 [ext_resource type="Shader" path="res://Shaders/TechBox.gdshader" id="1_d8f3e"]
 [ext_resource type="Shader" path="res://Shaders/TrippyPanel.gdshader" id="2_5vfwh"]
-[ext_resource type="Texture2D" uid="uid://dxcvj3lbroelx" path="res://icon.svg" id="3_7kqkx"]
+[ext_resource type="Texture2D" uid="uid://dxcvj3lbroelx" path="res://icon.svg" id="3_m4h3e"]
 [ext_resource type="Shader" path="res://Shaders/DepthBurn.gdshader" id="5_rrs6d"]
 [ext_resource type="Script" path="res://Camera.cs" id="6_5v0ng"]
 [ext_resource type="Material" uid="uid://busn7fyljnw0h" path="res://Materials/DepthBurn.tres" id="6_37fcu"]
+[ext_resource type="Script" path="res://MouseInputs.cs" id="7_g4bt5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f2c7t"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -22,26 +23,45 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_kl3gl"]
+resource_local_to_scene = true
 render_priority = 0
 shader = ExtResource("2_5vfwh")
-shader_parameter/RaysPerPixel = 11
-shader_parameter/MaxBounces = 3
-shader_parameter/NearPlane = 2.095
-shader_parameter/FarPlane = 20.0
-shader_parameter/FOV = 2.955
-shader_parameter/AspectRatio = 2.0
-shader_parameter/ViewMatrix = Projection(0.5, 0.32582, -0.802397, 0, 0, 0.926529, 0.376224, 0, 0.866025, -0.188112, 0.463264, 0, 1.65793, 0.482417, -23.172, 1)
-shader_parameter/InvViewMatrix = Projection(0.5, -1.49012e-08, 0.866025, 0, 0.32582, 0.926529, -0.188112, 0, -0.802397, 0.376224, 0.463264, 0, -19.5793, 8.2709, 9.38971, 1)
-shader_parameter/points = [Vector3(3.54, 9.27, -35.245), Vector3(-6.55984, 0, -0.920781), Vector3(-0.725, 0.41, 5.23), Vector3(0, -19.815, -0.045), Vector3(8, 0, 0)]
-shader_parameter/colors = PackedColorArray(0.839216, 0.729412, 0.545098, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0.4, 1, 1, 1, 1, 0, 1)
-shader_parameter/radii = [25.34, 3.0, 3.0, 18.58, 3.0]
-shader_parameter/roughness = PackedFloat32Array(1, 1, 1, 1, 1)
-shader_parameter/emissionColor = PackedColorArray(0.941176, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
-shader_parameter/testImage = ExtResource("3_7kqkx")
+shader_parameter/environment = false
+shader_parameter/GroundColor = Color(0.775749, 0.789227, 0.93023, 1)
+shader_parameter/SkyColorHorizon = Color(0.273873, 0.273873, 0.273873, 1)
+shader_parameter/SkyColorZenith = Color(0, 0, 0, 1)
+shader_parameter/SunLightDirection = Vector3(0, -0.875, 0)
+shader_parameter/SunFocus = 4.315
+shader_parameter/SunIntensity = 1.445
+shader_parameter/RaysPerPixel = 32
+shader_parameter/MaxBounces = 10
+shader_parameter/CameraPosition = Vector3(0, 0, 0)
+shader_parameter/CameraRotation = Vector3(-0.296706, 0, 0)
+shader_parameter/NearPlane = 0.1
+shader_parameter/FarPlane = 8.0
+shader_parameter/FOV = 2.0
+shader_parameter/AspectRatio = 1.0
+shader_parameter/RayDivergeStrength = 0.0
+shader_parameter/FocusDistance = 0.34
+shader_parameter/ViewMatrix = Projection(1, 0, 0, 0, 0, 0.956305, 0.292372, 0, 0, -0.292372, 0.956305, 0, -3.27281, -1.85865, -4.16342, 1)
+shader_parameter/InvViewMatrix = Projection(1, 0, 0, 0, -2.98023e-08, 0.956305, -0.292372, 7.45058e-09, 5.96046e-08, 0.292372, 0.956305, 0, 3.27281, 2.9947, 3.43808, 1)
+shader_parameter/RotationViewMatrix = null
+shader_parameter/ProjectionMatrix = null
+shader_parameter/InvProjectionMatrix = null
+shader_parameter/ViewTranslationMatrix = null
+shader_parameter/InvViewTranslationMatrix = null
+shader_parameter/points = [Vector3(1.57, 86.48, -135.83), Vector3(-12.603, -2.022, 0.291), Vector3(0.23, -1.46, 9.22), Vector3(0, -23.005, -0.145), Vector3(16.345, -5.09, -2.215)]
+shader_parameter/colors = PackedColorArray(0.839216, 0.729412, 0.545098, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1)
+shader_parameter/radii = [128.45, 3.0, 3.0, 18.635, 3.795]
+shader_parameter/roughness = PackedFloat32Array(1, 0, 0, 0, 0)
+shader_parameter/emissionColor = PackedColorArray(1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
+shader_parameter/emisionStrength = PackedFloat32Array(0.855, 0, 0, 0, 0)
+shader_parameter/specular = PackedFloat32Array(0, 0.285, 0.635, 0.4, 0.235)
+shader_parameter/testImage = ExtResource("3_m4h3e")
 
 [sub_resource type="QuadMesh" id="QuadMesh_62cn6"]
 material = SubResource("ShaderMaterial_kl3gl")
-size = Vector2(4, 2)
+size = Vector2(8, 2)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_2k2gu"]
 fractal_type = 2
@@ -105,7 +125,7 @@ albedo_color = Color(1, 0.352941, 0, 1)
 
 [sub_resource type="QuadMesh" id="QuadMesh_sj7ik"]
 material = SubResource("StandardMaterial3D_lj8lv")
-size = Vector2(42.7497, 21.3748)
+size = Vector2(11.3694, 5.68471)
 
 [sub_resource type="SphereMesh" id="SphereMesh_af1kc"]
 radius = 3.0
@@ -175,19 +195,15 @@ environment = SubResource("Environment_u7rgv")
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 5.77719, 0)
 shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.415)
-
 [node name="CarouselGimbal" type="Node3D" parent="."]
 transform = Transform3D(0.939693, 0, -0.34202, 0, 1, 0, 0.34202, 0, 0.939693, 0, -3.72529e-09, -20)
 rotation_edit_mode = 1
-visible = false
 
 [node name="Node3D" type="Node3D" parent="CarouselGimbal"]
 transform = Transform3D(0.939693, 0, 0.342019, 0, 1, 0, -0.342019, 0, 0.939693, 6.84039, 0, 18.7939)
 
 [node name="TrippyPanel" type="MeshInstance3D" parent="CarouselGimbal/Node3D"]
-transform = Transform3D(1, 0, -2.27374e-13, 0, 1, 0, 2.27374e-13, 0, 1, 0, 0, 1.67)
+transform = Transform3D(1, 0, -2.27374e-13, 0, 1, 0, 2.27374e-13, 0, 1, -1.90735e-06, 0, -0.33)
 mesh = SubResource("QuadMesh_62cn6")
 
 [node name="Node3D2" type="Node3D" parent="CarouselGimbal"]
@@ -219,83 +235,90 @@ mesh = SubResource("BoxMesh_na8xl")
 transform = Transform3D(1, 0, 1.25056e-12, 0, 1, 0, -1.25056e-12, 0, 1, 1.5, 1, -0.5)
 mesh = SubResource("BoxMesh_na8xl")
 
-[node name="Camera3D2" type="Camera3D" parent="." node_paths=PackedStringArray("panel", "NearPlane", "FarPlane", "Ball2", "RayMarker1", "RayMarker2", "RayMarker3", "RayMarker4", "RayOrigin1", "RayOrigin2", "RayOrigin3", "RayOrigin4")]
-transform = Transform3D(0.5, 0.32582, -0.802397, 0, 0.926529, 0.376224, 0.866025, -0.188112, 0.463264, -19.5793, 8.2709, 9.38971)
-current = true
-script = ExtResource("6_5v0ng")
-panel = NodePath("TrippyPanel2")
-NearPlane = NodePath("../MeshInstance3D2")
-FarPlane = NodePath("../MeshInstance3D3")
-Ball2 = NodePath("../MeshInstance3D")
-RayMarker1 = NodePath("../RayMarkerBall1")
-RayMarker2 = NodePath("../RayMarkerBall2")
-RayMarker3 = NodePath("../RayMarkerBall3")
-RayMarker4 = NodePath("../RayMarkerBall4")
-RayOrigin1 = NodePath("../RayOriginBall1")
-RayOrigin2 = NodePath("../RayOriginBall2")
-RayOrigin3 = NodePath("../RayOriginBall3")
-RayOrigin4 = NodePath("../RayOriginBall4")
-_NearPlane = 2.095
-_FarPlane = 20.0
-FOV = 2.955
-AspectRatio = 2.0
-
-[node name="TrippyPanel2" type="MeshInstance3D" parent="Camera3D2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.3)
-mesh = SubResource("QuadMesh_62cn6")
-
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1.00018, -2.04827e-06, -1.44448e-06, 7.97422e-06, 1.00005, 2.48849e-06, -3.97675e-07, 1.2517e-06, 1.00004, -17.8983, 7.48271, 8.41917)
+transform = Transform3D(1.00018, -2.04827e-06, -1.44448e-06, 7.97422e-06, 1.00005, 2.48849e-06, -3.97675e-07, 1.2517e-06, 1.00004, 3.27281, -0.826601, -9.06082)
 visible = false
 mesh = SubResource("QuadMesh_omyvq")
-skeleton = NodePath("../Camera3D2")
+skeleton = NodePath("../SubViewport/Camera3D2")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.999899, -2.04827e-06, 4.79259e-06, 3.97791e-06, 1.00005, 5.11855e-06, -2.7474e-07, 1.2517e-06, 1.00004, -3.53137, 0.746418, 0.124424)
+transform = Transform3D(0.999899, -2.04827e-06, 4.79259e-06, 3.97791e-06, 1.00005, 5.11855e-06, -2.7474e-07, 1.2517e-06, 1.00004, 3.27281, -1.79143, -12.2166)
 visible = false
 mesh = SubResource("QuadMesh_sj7ik")
-skeleton = NodePath("../Camera3D2")
+skeleton = NodePath("../SubViewport/Camera3D2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.55984, 0, -0.920781)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96.5123, 4.07034, 91.5179)
 mesh = SubResource("SphereMesh_af1kc")
 
 [node name="RayMarkerBall1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.7366, 10.6486, -20.3972)
-visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4119, 0.926726, -13.0477)
 mesh = SubResource("SphereMesh_bbw6j")
 
 [node name="RayMarkerBall2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6382, 10.6486, 16.6251)
-visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.95751, 0.926726, -13.0477)
 mesh = SubResource("SphereMesh_gb470")
 
 [node name="RayMarkerBall3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.701, -9.15578, -16.3763)
-visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4119, -4.50958, -11.3856)
 mesh = SubResource("SphereMesh_sguqw")
 
 [node name="RayMarkerBall4" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.67387, -9.15578, 20.646)
-visible = false
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.95751, -4.50958, -11.3856)
 mesh = SubResource("SphereMesh_qg1vv")
 
 [node name="RayOriginBall1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.5725, 8.40924, 6.49901)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.27281, 0.129703, -9.35319)
 visible = false
 mesh = SubResource("SphereMesh_posma")
 
 [node name="RayOriginBall2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5725, 8.40924, 9.96311)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.27281, 0.129703, -9.35319)
 visible = false
 mesh = SubResource("SphereMesh_8qqje")
 
 [node name="RayOriginBall3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.2241, 6.55619, 6.87523)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.27281, -1.78291, -8.76845)
 visible = false
 mesh = SubResource("SphereMesh_8dtn0")
 
+[node name="SubViewport" type="SubViewport" parent="."]
+own_world_3d = true
+size = Vector2i(1920, 1080)
+render_target_update_mode = 0
+
+[node name="Camera3D2" type="Camera3D" parent="SubViewport" node_paths=PackedStringArray("panel", "NearPlane", "FarPlane", "RayMarker1", "RayMarker2", "RayMarker3", "RayMarker4", "RayOrigin1", "RayOrigin2", "RayOrigin3", "RayOrigin4")]
+transform = Transform3D(0.996657, -0.0161602, 0.0800807, 9.35504e-09, 0.98024, 0.197811, -0.081695, -0.19715, 0.976964, 3.27281, 7.51473, 29.1679)
+current = true
+fov = 179.0
+far = 4.63
+script = ExtResource("6_5v0ng")
+panel = NodePath("../../CarouselGimbal/Node3D/TrippyPanel")
+NearPlane = NodePath("../../MeshInstance3D2")
+FarPlane = NodePath("../../MeshInstance3D3")
+RayMarker1 = NodePath("../../RayMarkerBall1")
+RayMarker2 = NodePath("../../RayMarkerBall2")
+RayMarker3 = NodePath("../../RayMarkerBall3")
+RayMarker4 = NodePath("../../RayMarkerBall4")
+RayOrigin1 = NodePath("../../RayOriginBall1")
+RayOrigin2 = NodePath("../../RayOriginBall2")
+RayOrigin3 = NodePath("../../RayOriginBall3")
+RayOrigin4 = NodePath("../../RayOriginBall4")
+_NearPlane = 0.045
+_FarPlane = 19.155
+FOV = 0.265
+AspectRatio = 6.695
+
+[node name="TrippyPanel2" type="MeshInstance3D" parent="SubViewport/Camera3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.19209e-07, -1.285)
+mesh = SubResource("QuadMesh_62cn6")
+
 [node name="RayOriginBall4" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17.2241, 6.55619, 10.3393)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.27281, -1.78291, -8.76845)
 visible = false
 mesh = SubResource("SphereMesh_0r703")
+
+[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("Camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.415)
+script = ExtResource("7_g4bt5")
+Camera = NodePath("../SubViewport/Camera3D2")

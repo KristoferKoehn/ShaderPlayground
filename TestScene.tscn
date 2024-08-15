@@ -1,0 +1,58 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6up3gd6f83pu"]
+
+[ext_resource type="Script" path="res://TestScene.cs" id="1_x6tk8"]
+[ext_resource type="Texture2D" uid="uid://dxcvj3lbroelx" path="res://icon.svg" id="3_37won"]
+[ext_resource type="Shader" path="res://Shaders/TrippyPanelCanvas.gdshader" id="3_u4nxx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1uvk4"]
+resource_local_to_scene = true
+shader = ExtResource("3_u4nxx")
+shader_parameter/environment = true
+shader_parameter/GroundColor = Color(0, 0, 0, 1)
+shader_parameter/SkyColorHorizon = Color(0, 0, 0, 1)
+shader_parameter/SkyColorZenith = Color(0, 0, 0, 1)
+shader_parameter/SunLightDirection = Vector3(-0.79, -0.965, 0.03)
+shader_parameter/SunFocus = 29.99
+shader_parameter/SunIntensity = 0.04
+shader_parameter/RaysPerPixel = 15
+shader_parameter/MaxBounces = 2
+shader_parameter/NearPlane = 0.075
+shader_parameter/FarPlane = 8.095
+shader_parameter/FOV = 2.955
+shader_parameter/AspectRatio = 2.0
+shader_parameter/ViewMatrix = Projection(0.34366, 0, 0.939094, 0, 0, 1, 0, 0, -0.939094, 0, 0.34366, 0, 0, 0, 0, 1)
+shader_parameter/InvViewMatrix = Projection(0.34366, 0, -0.939094, 0, 0, 1, 0, 0, 0.939094, 0, 0.34366, 0, 0, 0, 0, 1)
+shader_parameter/PreviousFrameWeight = 0.0
+shader_parameter/points = PackedVector3Array(0, 0, -10.15, 0, 0, 10, 10, 0, 0, -10, 0, 0, 0, -23.41, 0)
+shader_parameter/colors = PackedColorArray(1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1)
+shader_parameter/radii = PackedFloat32Array(2.035, 1.05, 0.82, 2.62, 21.42)
+shader_parameter/roughness = PackedFloat32Array(1, 1, 1, 1, 0)
+shader_parameter/emissionColor = PackedColorArray(0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)
+shader_parameter/emisionStrength = null
+
+[node name="TestScene" type="Node2D" node_paths=PackedStringArray("visuals", "FakeNode")]
+script = ExtResource("1_x6tk8")
+_FarPlane = 1.27
+FOV = 2.0
+AspectRatio = 2.0
+visuals = NodePath("Control/Sprite2D2")
+FakeNode = NodePath("Node3D")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+
+[node name="Camera2D" type="Camera2D" parent="Control"]
+position = Vector2(1155, 642)
+
+[node name="Sprite2D2" type="Sprite2D" parent="Control"]
+top_level = true
+material = SubResource("ShaderMaterial_1uvk4")
+position = Vector2(1160, 631)
+scale = Vector2(18.0637, 9.84625)
+texture = ExtResource("3_37won")
+
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(0.34366, 0, 0.939094, 0, 1, 0, -0.939094, 0, 0.34366, 0, 0, 0)

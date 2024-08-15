@@ -1,8 +1,8 @@
 using Godot;
 using Godot.Collections;
 using System;
+using System.Collections.Generic;
 
-[Tool]
 public partial class Camera : Camera3D
 {
     [Export]
@@ -15,7 +15,7 @@ public partial class Camera : Camera3D
     MeshInstance3D FarPlane = null;
 
     [Export]
-    float MouseSensitivity { get; set; } = 0.2f;
+    public float MouseSensitivity { get; set; } = 0.2f;
 
     [Export] MeshInstance3D Ball2;
     [Export] MeshInstance3D RayMarker1;
@@ -30,13 +30,11 @@ public partial class Camera : Camera3D
     [Export] MeshInstance3D RayOrigin4;
 
 
-    [Export] MeshInstance3D LocalToWorld;
-
 
     [Export(PropertyHint.Range, "0,90")]
-    float TotalPitch { get; set; } = 85f;
-    Vector2 mouseMotion = Vector2.Zero;
-	float moveSpeed = 40.0f;
+    public float TotalPitch { get; set; } = 85f;
+    public Vector2 mouseMotion = Vector2.Zero;
+	public float moveSpeed = 40.0f;
 
 
     [Export] float _NearPlane = 0.1f;
@@ -48,10 +46,50 @@ public partial class Camera : Camera3D
     Projection ViewMatrix = new Projection();
     Projection InvViewMatrix = new Projection();
 
+
+    public byte ByteLerp(byte b, byte c, float t)
+    {
+        t = Mathf.Clamp(t, 0.0f, 1.0f);
+        b = (byte)(b * (1.0 - t) + c * t);
+        b = (byte)Mathf.Clamp(b, 0, 255);
+        return b;
+    }
+
+    List<Image> Images = new List<Image>();
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
 	{
 	}
+
+    public Image ProcessImages(List<Image> images)
+    {
+        byte[] AccumulatedData = images[0].GetData();
+
+
+        List<byte[]> imageData = new List<byte[]>();
+        foreach(Image image in images)
+        {
+            imageData.Add(image.GetData());
+        }
+
+
+
+        for (int p = 0; p < AccumulatedData.Length; p++)
+        {
+            int p_accumulator = 0;
+            for (int i = 0; i < imageData.Count; i++)
+            {
+                p_accumulator += imageData[i][p];
+            }
+            AccumulatedData[p] = (byte)(p_accumulator / imageData.Count);
+        }
+
+        Image FinalImage = new Image();
+        FinalImage.SetData(images[0].GetWidth(), images[0].GetHeight(), false, Image.Format.Rgb8, AccumulatedData);
+        GD.Print($"{images.Count}");
+        return FinalImage;
+    }
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
@@ -89,7 +127,7 @@ public partial class Camera : Camera3D
                     ZRotationMatrix.Z = new Vector4(0, 0, 1, 0);
                     ZRotationMatrix.W = new Vector4(0, 0, 0, 1);
 
-                    Projection RotationMatrix = ZRotationMatrix * XRotationMatrix * YRotationMatrix;
+                    Projection RotationMatrix = XRotationMatrix * ZRotationMatrix * YRotationMatrix ;
 
 
                     Projection TranslationMatrix = new Projection();
@@ -102,78 +140,37 @@ public partial class Camera : Camera3D
                     ViewMatrix = RotationMatrix * TranslationMatrix;
                     InvViewMatrix = (RotationMatrix * TranslationMatrix).Inverse();
 
-                    //sm.SetShaderParameter("CameraPosition", Position);
+                    Projection ProjectionMatrix = new Projection();
+
+                    Projection p = this.GetCameraProjection();
+                    
+                    float FocalLength = 1.0f / Mathf.Tan(Mathf.DegToRad(FOV) / 2.0f);
+
+                    float x = FocalLength / AspectRatio;
+                    float y = -FocalLength;
+
+                    float A = _NearPlane / (_FarPlane - _NearPlane);
+                    float B = _FarPlane * A;
+
+                    ProjectionMatrix.X = new Vector4(x, 0, 0, 0);
+                    ProjectionMatrix.Y = new Vector4(0, y, 0, 0);
+                    ProjectionMatrix.Z = new Vector4(0, 0, A, B);
+                    ProjectionMatrix.W = new Vector4(0, 0, -1.0f, 0);
+
+
+                    sm.SetShaderParameter("CameraPosition", Position);
                     sm.SetShaderParameter("CameraRotation", new Vector3(GlobalRotation.X, GlobalRotation.Y, 0));
                     sm.SetShaderParameter("ViewMatrix", ViewMatrix);
+                    sm.SetShaderParameter("RotationViewMatrix", RotationMatrix);
                     sm.SetShaderParameter("InvViewMatrix", InvViewMatrix);
                     sm.SetShaderParameter("NearPlane", _NearPlane);
                     sm.SetShaderParameter("FarPlane", _FarPlane);
                     sm.SetShaderParameter("FOV", FOV);
                     sm.SetShaderParameter("AspectRatio", AspectRatio);
-                    
-                    Array<Vector3> points = (Array<Vector3>)sm.GetShaderParameter("points");
-                    points[1] = Ball2.GlobalPosition;
-                    sm.SetShaderParameter("points", points);
-
-                    Array<float> radii = (Array<float>)sm.GetShaderParameter("radii");
-                    radii[1] = ((SphereMesh)Ball2.Mesh).Radius;
-                    sm.SetShaderParameter("radii", radii);
-
-                    Vector4 passnear = (RotationMatrix * TranslationMatrix).Inverse() * new Vector4(0, 0, -_NearPlane, 1);
-                    Vector4 passfar = (RotationMatrix * TranslationMatrix).Inverse() * new Vector4(0, 0, -_FarPlane, 1);
-
-                    Vector3 nearPlane = new Vector3(passnear.X, passnear.Y, passnear.Z);
-                    Vector3 farPlane = new Vector3(passfar.X, passfar.Y, passfar.Z);
-
-                    NearPlane.GlobalPosition = nearPlane;
-                    FarPlane.GlobalPosition = farPlane;
-
-                    float x_range = (2.0f * 1.0f - 1.0f) - (2.0f * 0 - 1.0f);
-                    float y_range = (1.0f - 2.0f * 1.0f) - (1.0f - 2.0f * 0);
-                    float x = x_range * Mathf.Tan(FOV / 2.0f) * AspectRatio;
-                    float y = -y_range * Mathf.Tan(FOV / 2.0f);
-
-                    //vec3(x_ndc * tan(FOV / 2.0) * AspectRatio, -y_ndc * tan(FOV / 2.0), -FarPlane);
-                    //float x_ndc = 2.0 * uv.x - 1.0;
-                    //float y_ndc = 1.0 - 2.0 * uv.y;
-                    Vector3 coord = new();
-                    Vector4 ray = new();
-                    coord = GetFarPlane(new Vector2(0, 0));
-                    ray = InvViewMatrix * new Vector4(coord.X, coord.Y, coord.Z, 1.0f);
-                    RayMarker1.GlobalPosition = new Vector3(ray.X, ray.Y, ray.Z);
-
-                    coord = GetFarPlane(new Vector2(1.0f, 0));
-                    ray = InvViewMatrix * new Vector4(coord.X, coord.Y, coord.Z, 1.0f);
-
-                    RayMarker2.GlobalPosition = new Vector3(ray.X, ray.Y, ray.Z);
-
-                    coord = GetFarPlane(new Vector2(0.0f, 1.0f));
-                    ray = InvViewMatrix * new Vector4(coord.X, coord.Y, coord.Z, 1.0f);
-
-                    RayMarker3.GlobalPosition = new Vector3(ray.X, ray.Y, ray.Z);
-
-                    coord = GetFarPlane(new Vector2(1.0f, 1.0f));
-                    ray = InvViewMatrix * new Vector4(coord.X, coord.Y, coord.Z, 1.0f);
-                    RayMarker4.GlobalPosition = new Vector3(ray.X, ray.Y, ray.Z);
-
-
-                    ray = GetNearPlane(new Vector2(0.0f, 0.0f));
-                    RayOrigin1.GlobalPosition = InvViewMatrix * new Vector3(ray.X, ray.Y, ray.Z);
-
-                    ray = GetNearPlane(new Vector2(1.0f, 0.0f));
-                    RayOrigin2.GlobalPosition = InvViewMatrix * new Vector3(ray.X, ray.Y, ray.Z);
-
-                    ray = GetNearPlane(new Vector2(0.0f, 1.0f));
-                    RayOrigin3.GlobalPosition = InvViewMatrix * new Vector3(ray.X, ray.Y, ray.Z);
-
-                    ray = GetNearPlane(new Vector2(1.0f, 1.0f));
-                    RayOrigin4.GlobalPosition = InvViewMatrix * new Vector3(ray.X, ray.Y, ray.Z);
-
-                    ((QuadMesh)NearPlane.Mesh).Size = new Vector2(x/ Mathf.Tan(FOV / 2.0f), y/ Mathf.Tan(FOV / 2.0f));
-
-                    ((QuadMesh)FarPlane.Mesh).Size = new Vector2(x,y);
-
-                    
+                    sm.SetShaderParameter("ProjectionMatrix", p);
+                    sm.SetShaderParameter("InvProjectionMatrix", p.Inverse());
+                    sm.SetShaderParameter("ViewTranslationMatrix", TranslationMatrix);
+                    sm.SetShaderParameter("InvViewTranslationMatrix", TranslationMatrix.Inverse());
 
                 }
             }
@@ -214,13 +211,34 @@ public partial class Camera : Camera3D
                 input += new Vector3(0, -1, 0);
             }
 
+            if(Input.IsActionPressed("ui_select"))
+            {
+                Image m = GetViewport().GetTexture().GetImage();
+                m.Convert(Image.Format.Rgb8);
+                //m.SavePng($"res://renders/Render{count}.png");
+                Images.Add(m);
+                //count++;
+            }
+
+
+            if(Input.IsActionJustReleased("ui_select"))
+            {
+
+                byte test = 33;
+                byte test2 = 255;
+                GD.Print($"{ByteLerp(test,test2, 0.5f)}");
+
+                Image render = ProcessImages(Images);
+
+                render.SavePng($"res://renders/Render{Guid.NewGuid()}.png");
+                Images.Clear();
+            }
+
             Vector3 Velocity = input.Normalized() * moveSpeed * (float)delta;
             //Position += Velocity;
             input = Vector3.Zero;
             Translate(Velocity);
-
         }
-
     }
 
     Vector3 GetFarPlane(Vector2 uv)
