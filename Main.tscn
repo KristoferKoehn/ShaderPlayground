@@ -285,12 +285,12 @@ mesh = SubResource("SphereMesh_8dtn0")
 [node name="SubViewport" type="SubViewport" parent="."]
 own_world_3d = true
 size = Vector2i(1920, 1080)
-render_target_update_mode = 0
+render_target_update_mode = 4
 
 [node name="Camera3D2" type="Camera3D" parent="SubViewport" node_paths=PackedStringArray("panel", "NearPlane", "FarPlane", "RayMarker1", "RayMarker2", "RayMarker3", "RayMarker4", "RayOrigin1", "RayOrigin2", "RayOrigin3", "RayOrigin4")]
-transform = Transform3D(0.996657, -0.0161602, 0.0800807, 9.35504e-09, 0.98024, 0.197811, -0.081695, -0.19715, 0.976964, 3.27281, 7.51473, 29.1679)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.27281, 7.51473, 29.1679)
 current = true
-fov = 179.0
+fov = 117.9
 far = 4.63
 script = ExtResource("6_5v0ng")
 panel = NodePath("../../CarouselGimbal/Node3D/TrippyPanel")
@@ -306,7 +306,7 @@ RayOrigin3 = NodePath("../../RayOriginBall3")
 RayOrigin4 = NodePath("../../RayOriginBall4")
 _NearPlane = 0.045
 _FarPlane = 19.155
-FOV = 0.265
+FOV = 2.525
 AspectRatio = 6.695
 
 [node name="TrippyPanel2" type="MeshInstance3D" parent="SubViewport/Camera3D2"]

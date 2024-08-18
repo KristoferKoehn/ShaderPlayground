@@ -262,17 +262,13 @@ void fragment() {
 		vec2 jitter = RandomPointInCircle(Seed) * RayDivergeStrength;
 		State = Seed;
 		vec2 ndc = GetNDC(UV);
-
-		vec3 target = (InvProjectionMatrix *InvViewMatrix *  vec4(ndc, 1.0, 1.0)).xyz;
-		vec3 RayOrigin = (InvProjectionMatrix *InvViewMatrix *  vec4(ndc, 0.0, 1.0)).xyz;
-		
 		/*
-		
 		messing with projection matrix to get field of view working. It's not working.
+		*/
 		
 		vec3 RayOrigin = (InvViewMatrix * vec4(ndc.x * AspectRatio + jitter.x, ndc.y * jitter.y, -NearPlane, 1.0)).xyz;
 		vec3 target =  (InvViewMatrix * vec4(FarPlanePositionFromUV(UV, FocusDistance), 1.0)).xyz;
-		*/
+		
 		r.origin = RayOrigin;
 		r.dir = normalize(target - r.origin);
 		int bounces = 0;
